@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>動物拔河PK大賽：四年級角度與量角器（平板雙人對戰版）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+    
+    /* Face-to-Face 180-degree rotation */
+    .face-opposite {
+      transform: rotate(180deg);
+      transform-origin: center center;
+    }
+
+    /* Floating / Celebration keyframes */
+    @keyframes floatBob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    .floating-badge {
+      animation: floatBob 2s infinite ease-in-out;
+    }
+
+    @keyframes popFlash {
+      0% { transform: scale(0.92); opacity: 0.8; }
+      50% { transform: scale(1.04); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pop-anim {
+      animation: popFlash 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  </style>
+</head>
+<body class="bg-amber-100 text-slate-800 h-screen w-screen flex flex-col justify-between overflow-hidden">
+
+  <header class="bg-white/95 backdrop-blur-md shadow-sm border-b border-amber-300 px-3 py-1.5 flex items-center justify-between z-40 shrink-0">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-sm text-base">
+        <i class="fa-solid fa-shapes"></i>
+      </div>
+      <div>
+        <h1 class="text-sm sm:text-base font-black text-amber-950 flex items-center gap-1.5 leading-tight">
+          動物拔河角度大對決 
+          <span class="text-[10px] sm:text-xs font-semibold px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200">平板對戰版</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Quick Mode Toggles for Classroom Tablet Use -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Mode Toggle: Face-to-Face vs Side-by-Side -->
+      <button id="layoutToggleBtn" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 font-bold text-xs shadow-xs active:scale-95 transition">
+        <i id="layoutIcon" class="fa-solid fa-arrows-up-down text-indigo-600"></i>
+        <span id="layoutLabel">面對面(180°)</span>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button id="fullscreenBtn" class="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs shadow-xs active:scale-95 transition">
+        <i class="fa-solid fa-expand"></i>
+        <span class="hidden sm:inline ml-0.5">全螢幕</span>
+      </button>
+
+      <!-- Sound Toggle -->
+      <button id="soundToggleBtn" class="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs shadow-xs active:scale-95 transition">
+        <i id="soundIcon" class="fa-solid fa-volume-high text-amber-700"></i>
+      </button>
+
+      <!-- Restart Game -->
+      <button id="resetGameBtn" class="px-2.5 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-xs active:scale-95 transition">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+    </div>
+  </header>
+
+  <main id="gameMainContainer" class="flex-1 flex flex-col p-1.5 sm:p-2 gap-1.5 w-full h-full max-w-6xl mx-auto overflow-hidden">
+    
+    <!-- ================= PLAYER 2 / TOP PLAYER (Bunny Team) ================= -->
+    <!-- When in face-to-face mode, this entire section has the 'face-opposite' class applied -->
+    <div id="p2Section" class="face-opposite flex-1 bg-white rounded-2xl p-2 sm:p-3 border-3 border-rose-300 shadow flex flex-col justify-between transition-transform duration-300 min-h-0">
+      <!-- Player 2 Top Header -->
+      <div class="flex items-center justify-between border-b pb-1.5 border-rose-100 shrink-0">
+        <div class="flex items-center gap-1.5">
+          <span class="w-7 h-7 rounded-xl bg-rose-500 text-white flex items-center justify-center font-bold text-base shadow-xs">🐰</span>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-xs sm:text-sm font-black text-rose-950">紅隊 • 活力兔子</h2>
+              <span id="p2LevelTag" class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">基礎認識</span>
+            </div>
+            <span id="p2ScoreStatus" class="text-[11px] font-extrabold text-rose-700">得分: 0 分 (第 1/10 題)</span>
+          </div>
+        </div>
+        <div class="w-24 sm:w-32 bg-rose-100 h-2 rounded-full overflow-hidden border border-rose-200">
+          <div id="p2ProgressBar" class="bg-rose-500 h-full w-[10%] transition-all duration-300 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- Question & Visual Area -->
+      <div class="flex flex-row items-center gap-2 flex-1 my-1 min-h-0">
+        <!-- Question Text & Feedback -->
+        <div class="w-1/2 flex flex-col justify-center">
+          <p id="p2QuestionText" class="text-xs sm:text-sm font-bold text-slate-800 leading-snug line-clamp-3">正在載入題目...</p>
+          <div id="p2FeedbackBox" class="mt-1 p-1.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] hidden">
+            <span id="p2FeedbackText" class="font-medium text-slate-700"></span>
+          </div>
+        </div>
+
+        <!-- Question Geometry Canvas -->
+        <div class="w-1/2 h-full min-h-[90px] rounded-xl bg-rose-50/60 border border-rose-200 relative flex items-center justify-center overflow-hidden">
+          <canvas id="p2VisCanvas" class="w-full h-full block"></canvas>
+        </div>
+      </div>
+
+      <!-- Options Buttons (Touch Optimized) -->
+      <div id="p2OptionsGrid" class="grid grid-cols-2 gap-1.5 shrink-0">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+    <!-- ================= MIDDLE TUG-OF-WAR ARENA CANVAS ================= -->
+    <div class="h-24 sm:h-28 shrink-0 bg-gradient-to-b from-sky-100 via-amber-50 to-emerald-100 rounded-2xl border-2 border-amber-300 shadow-sm relative overflow-hidden flex flex-col justify-between p-1">
+      <!-- Tug Info Header -->
+      <div class="flex justify-between items-center px-3 z-10 text-[11px] font-extrabold">
+        <span class="text-blue-700 flex items-center gap-1">🐻 藍熊隊</span>
+        <span id="tugCenterPrompt" class="text-amber-900 bg-white/90 px-3 py-0.5 rounded-full shadow-xs border border-amber-200">
+          拔河對決中！答對拉向自己！
+        </span>
+        <span class="text-rose-700 flex items-center gap-1">紅兔隊 🐰</span>
+      </div>
+
+      <!-- Tug Simulation Canvas -->
+      <div class="w-full h-full relative">
+        <canvas id="tugCanvas" class="w-full h-full block"></canvas>
+      </div>
+    </div>
+
+    <!-- ================= PLAYER 1 / BOTTOM PLAYER (Bear Team) ================= -->
+    <div id="p1Section" class="flex-1 bg-white rounded-2xl p-2 sm:p-3 border-3 border-blue-300 shadow flex flex-col justify-between min-h-0">
+      <!-- Player 1 Header -->
+      <div class="flex items-center justify-between border-b pb-1.5 border-blue-100 shrink-0">
+        <div class="flex items-center gap-1.5">
+          <span class="w-7 h-7 rounded-xl bg-blue-500 text-white flex items-center justify-center font-bold text-base shadow-xs">🐻</span>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-xs sm:text-sm font-black text-blue-950">藍隊 • 元氣小熊</h2>
+              <span id="p1LevelTag" class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">基礎認識</span>
+            </div>
+            <span id="p1ScoreStatus" class="text-[11px] font-extrabold text-blue-700">得分: 0 分 (第 1/10 題)</span>
+          </div>
+        </div>
+        <div class="w-24 sm:w-32 bg-blue-100 h-2 rounded-full overflow-hidden border border-blue-200">
+          <div id="p1ProgressBar" class="bg-blue-500 h-full w-[10%] transition-all duration-300 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- Question & Visual Area -->
+      <div class="flex flex-row items-center gap-2 flex-1 my-1 min-h-0">
+        <!-- Question Text & Feedback -->
+        <div class="w-1/2 flex flex-col justify-center">
+          <p id="p1QuestionText" class="text-xs sm:text-sm font-bold text-slate-800 leading-snug line-clamp-3">正在載入題目...</p>
+          <div id="p1FeedbackBox" class="mt-1 p-1.5 rounded-xl bg-blue-50 border border-blue-200 text-[11px] hidden">
+            <span id="p1FeedbackText" class="font-medium text-slate-700"></span>
+          </div>
+        </div>
+
+        <!-- Question Geometry Canvas -->
+        <div class="w-1/2 h-full min-h-[90px] rounded-xl bg-blue-50/60 border border-blue-200 relative flex items-center justify-center overflow-hidden">
+          <canvas id="p1VisCanvas" class="w-full h-full block"></canvas>
+        </div>
+      </div>
+
+      <!-- Options Buttons (Touch Optimized) -->
+      <div id="p1OptionsGrid" class="grid grid-cols-2 gap-1.5 shrink-0">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <div id="gameOverModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 text-center border-4 border-amber-300 shadow-2xl pop-anim">
+      <div id="trophyIcon" class="text-5xl mb-2 floating-badge">🏆</div>
+      <h2 id="winnerText" class="text-xl font-black text-slate-800 mb-1">小熊隊獲勝！</h2>
+      <p id="winnerSubText" class="text-xs text-slate-600 mb-4">掌握量角器角度技巧，順利拔得頭籌！</p>
+      
+      <!-- Stats Summary -->
+      <div class="bg-amber-50 rounded-2xl p-3 border border-amber-200 mb-4 flex justify-around">
+        <div class="text-center">
+          <span class="text-xl">🐻</span>
+          <div class="text-[11px] font-bold text-blue-700">元氣小熊隊</div>
+          <div id="finalP1Score" class="text-base font-extrabold text-blue-900">0 題正確</div>
+        </div>
+        <div class="h-8 w-[2px] bg-amber-200 self-center"></div>
+        <div class="text-center">
+          <span class="text-xl">🐰</span>
+          <div class="text-[11px] font-bold text-rose-700">活力兔子隊</div>
+          <div id="finalP2Score" class="text-base font-extrabold text-rose-900">0 題正確</div>
+        </div>
+      </div>
+
+      <button id="modalRestartBtn" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 text-white font-extrabold rounded-xl shadow-md transition active:scale-95 text-sm">
+        <i class="fa-solid fa-rotate-right mr-1"></i> 重新開始對戰
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let audioCtx = null;
+    let isSoundOn = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.2) {
+      if (!isSoundOn) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // audio might be blocked until user touch
+      }
+    }
+
+    function soundPull() {
+      playTone(190, 'triangle', 0.15, 0.3);
+      setTimeout(() => playTone(260, 'sine', 0.15, 0.25), 60);
+    }
+    function soundRight() {
+      playTone(523.25, 'triangle', 0.1, 0.25);
+      setTimeout(() => playTone(659.25, 'triangle', 0.12, 0.25), 80);
+      setTimeout(() => playTone(783.99, 'sine', 0.2, 0.3), 160);
+    }
+    function soundWrong() {
+      playTone(250, 'sawtooth', 0.15, 0.2);
+      setTimeout(() => playTone(180, 'sawtooth', 0.25, 0.2), 120);
+    }
+    function soundWin() {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((f, i) => setTimeout(() => playTone(f, 'triangle', 0.25, 0.3), i * 130));
+    }
+
+    const PLAYER1_QUESTIONS = [
+      {
+        level: "角的基本概念",
+        text: "1. 觀察圖中量測的角度剛好為 90 度，這個角稱為什麼角？",
+        visual: { mode: "angle", deg: 90, label: "90°" },
+        options: ["銳角", "直角", "鈍角", "平角"],
+        ans: 1,
+        exp: "剛好 90 度的角稱為『直角』，常會畫上方形的直角記號！"
+      },
+      {
+        level: "平角與直線",
+        text: "2. 兩條射線成一條直線（度數是 180 度），這個角稱為什麼角？",
+        visual: { mode: "angle", deg: 180, label: "180°" },
+        options: ["銳角", "直角", "平角", "周角"],
+        ans: 2,
+        exp: "兩邊展開成一直線、度數為 180 度的角叫做『平角』。"
+      },
+      {
+        level: "量角器讀數 (一)",
+        text: "3. 角的一邊對齊『右邊 0 刻度』，角的另一邊所指的度數是多少？",
+        visual: { mode: "protractor", targetDeg: 50, side: "right" },
+        options: ["40 度", "50 度", "130 度", "140 度"],
+        ans: 1,
+        exp: "底邊對齊右邊 0 刻度線（內圈），讀取內圈刻度指向 50 度！"
+      },
+      {
+        level: "量角器讀數 (二)",
+        text: "4. 底邊對齊『左邊 0 刻度』（外圈），這是一個鈍角，請問是幾度？",
+        visual: { mode: "protractor", targetDeg: 125, side: "left" },
+        options: ["55 度", "65 度", "125 度", "135 度"],
+        ans: 2,
+        exp: "底邊對齊左側 0 刻度（外圈），沿著外圈讀取為 125 度！"
+      },
+      {
+        level: "時鐘夾角 (一)",
+        text: "5. 鐘面上 3 點整的時候，時針和分針所夾的較小角是多少度？",
+        visual: { mode: "clock", hour: 3, minute: 0 },
+        options: ["60 度", "90 度", "120 度", "180 度"],
+        ans: 1,
+        exp: "鐘面每大格 30 度。3 點整相差 3 格：30° × 3 = 90°（直角）！"
+      },
+      {
+        level: "時鐘夾角 (二)",
+        text: "6. 當分針從數字 12 走到數字 4，分針一共轉了多少度？",
+        visual: { mode: "clockSpan", start: 12, end: 4 },
+        options: ["90 度", "120 度", "140 度", "150 度"],
+        ans: 1,
+        exp: "數字 12 到 4 共有 4 個大格：30° × 4 = 120°。"
+      },
+      {
+        level: "角度加法",
+        text: "7. 角 A 是 45 度，角 B 是 35 度，把這兩個角拼合在一起是多少度？",
+        visual: { mode: "combine", a: 45, b: 35 },
+        options: ["70 度", "75 度", "80 度", "85 度"],
+        ans: 2,
+        exp: "兩角拼合即為相加：45° + 35° = 80°。"
+      },
+      {
+        level: "平角減法",
+        text: "8. 一個平角（180 度）扣掉一個 65 度的角，剩下的角度是多少？",
+        visual: { mode: "straightDiff", total: 180, cut: 65 },
+        options: ["105 度", "115 度", "125 度", "135 度"],
+        ans: 1,
+        exp: "平角是 180°：180° - 65° = 115°。"
+      },
+      {
+        level: "三角板拼角",
+        text: "9. 用等腰直角三角板的 45° 和另一塊的 60° 拼在一起，夾角是幾度？",
+        visual: { mode: "triangles", a: 45, b: 60 },
+        options: ["95 度", "100 度", "105 度", "110 度"],
+        ans: 2,
+        exp: "三角板拼合角度：45° + 60° = 105°。"
+      },
+      {
+        level: "周角推理",
+        text: "10. 一個周角（360度）扣掉 210 度角，另一個角是多少度？",
+        visual: { mode: "perigonDiff", part: 210 },
+        options: ["140 度", "150 度", "160 度", "170 度"],
+        ans: 1,
+        exp: "一整圈周角 360°：360° - 210° = 150°！"
+      }
+    ];
+
+    const PLAYER2_QUESTIONS = [
+      {
+        level: "角的基本概念",
+        text: "1. 觀察圖中量測的角度為 40 度（小於 90 度），這個角稱為什麼角？",
+        visual: { mode: "angle", deg: 40, label: "40°" },
+        options: ["銳角", "直角", "鈍角", "平角"],
+        ans: 0,
+        exp: "大於 0 度且小於 90 度的角尖尖的，稱作『銳角』！"
+      },
+      {
+        level: "周角概念",
+        text: "2. 射線繞著頂點旋轉了一整圈回到原處（360度），稱為什麼角？",
+        visual: { mode: "angle", deg: 360, label: "360°" },
+        options: ["直角", "平角", "周角", "鈍角"],
+        ans: 2,
+        exp: "旋轉一整圈正好是 360 度，稱作『周角』。"
+      },
+      {
+        level: "量角器讀數 (一)",
+        text: "3. 角的一邊對齊『右邊 0 刻度』，另一邊指向鈍角，這個角度是多少？",
+        visual: { mode: "protractor", targetDeg: 130, side: "right" },
+        options: ["50 度", "60 度", "130 度", "140 度"],
+        ans: 2,
+        exp: "底邊對齊右側 0 度（內圈），順著內圈看過去是 130 度！"
+      },
+      {
+        level: "量角器讀數 (二)",
+        text: "4. 底邊對齊『左邊 0 刻度』（外圈），指向銳角位置，角度是幾度？",
+        visual: { mode: "protractor", targetDeg: 70, side: "left" },
+        options: ["70 度", "80 度", "110 度", "120 度"],
+        ans: 0,
+        exp: "底邊對齊左側 0 刻度（外圈），由左往右讀外圈是 70 度！"
+      },
+      {
+        level: "時鐘夾角 (一)",
+        text: "5. 鐘面上 4 點整的時候，時針與分針夾的較小角是多少度？",
+        visual: { mode: "clock", hour: 4, minute: 0 },
+        options: ["90 度", "120 度", "135 度", "150 度"],
+        ans: 1,
+        exp: "鐘面每大格 30 度。4 點整相隔 4 個大格：30° × 4 = 120°。"
+      },
+      {
+        level: "時鐘夾角 (二)",
+        text: "6. 當鐘面上的分針走了 15 分鐘（12 走到 3），旋轉了多少度？",
+        visual: { mode: "clockSpan", start: 12, end: 3 },
+        options: ["60 度", "75 度", "90 度", "120 度"],
+        ans: 2,
+        exp: "15 分鐘走 3 個大格：30° × 3 = 90°（剛好形成直角）！"
+      },
+      {
+        level: "角度相加",
+        text: "7. 角 A 是 50 度，角 B 是 40 度，拼在一起會形成什麼角？",
+        visual: { mode: "combine", a: 50, b: 40 },
+        options: ["銳角(70°)", "銳角(80°)", "直角(90°)", "鈍角(100°)"],
+        ans: 2,
+        exp: "50° + 40° = 90°，剛好等於 90 度，所以是『直角』！"
+      },
+      {
+        level: "直角減法",
+        text: "8. 直角（90 度）由一個 32 度的角和另一個角組成，另一個角是多少？",
+        visual: { mode: "straightDiff", total: 90, cut: 32 },
+        options: ["48 度", "58 度", "68 度", "122 度"],
+        ans: 1,
+        exp: "直角是 90°：90° - 32° = 58°。"
+      },
+      {
+        level: "三角板拼角",
+        text: "9. 一塊三角板的 30° 角和另一塊的 45° 角拼在一起，合起來是幾度？",
+        visual: { mode: "triangles", a: 30, b: 45 },
+        options: ["65 度", "70 度", "75 度", "85 度"],
+        ans: 2,
+        exp: "30° + 45° = 75°，這是個銳角。"
+      },
+      {
+        level: "時鐘推理",
+        text: "10. 鐘面上 6 點整夾角 180 度，到了 7 點整時針分針較小夾角是多少？",
+        visual: { mode: "clock", hour: 7, minute: 0 },
+        options: ["140 度", "150 度", "160 度", "210 度"],
+        ans: 1,
+        exp: "7 點整較小夾角為 5 個大格（7 到 12 共 5 格）：30° × 5 = 150°！"
+      }
+    ];
+
+    let isFaceToFace = true; // Default Tabletop Face-to-Face mode
+    let gameState = {
+      p1Index: 0,
+      p2Index: 0,
+      p1Score: 0,
+      p2Score: 0,
+      p1Locked: false,
+      p2Locked: false,
+      ropePos: 0,       // Current smoothed offset
+      targetRope: 0,    // Target pull offset (-100 to +100)
+      animTime: 0,
+      particles: [],
+      p1State: 'idle',  // 'idle', 'pull', 'sweat', 'win'
+      p2State: 'idle',
+      isOver: false
+    };
+
+    function addParticles(x, y, color) {
+      for (let i = 0; i < 14; i++) {
+        gameState.particles.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.7) * 6,
+          radius: Math.random() * 3 + 2,
+          color: color,
+          alpha: 1,
+          life: 30
+        });
+      }
+    }
+
+    const tugCanvas = document.getElementById('tugCanvas');
+    const tCtx = tugCanvas.getContext('2d');
+
+    function resizeCanvas(c, ctx) {
+      const rect = c.getBoundingClientRect();
+      c.width = rect.width * window.devicePixelRatio;
+      c.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    function drawCuteBear(ctx, x, y, state) {
+      ctx.save();
+      ctx.translate(x, y);
+      let lean = 0;
+      let bob = Math.sin(gameState.animTime * 6) * 1.5;
+      if (state === 'pull') lean = -12;
+      if (state === 'sweat') lean = 6;
+      ctx.rotate((lean * Math.PI) / 180);
+
+      // Bear body
+      ctx.fillStyle = "#8D5B4C";
+      ctx.beginPath();
+      ctx.ellipse(0, 10 + bob, 16, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Belly
+      ctx.fillStyle = "#D7B19D";
+      ctx.beginPath();
+      ctx.ellipse(0, 12 + bob, 9, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Head
+      ctx.fillStyle = "#8D5B4C";
+      ctx.beginPath();
+      ctx.arc(0, -9 + bob, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ears
+      ctx.beginPath();
+      ctx.arc(-12, -22 + bob, 6, 0, Math.PI * 2);
+      ctx.arc(12, -22 + bob, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#D7B19D";
+      ctx.beginPath();
+      ctx.arc(-12, -22 + bob, 3, 0, Math.PI * 2);
+      ctx.arc(12, -22 + bob, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Snout
+      ctx.fillStyle = "#D7B19D";
+      ctx.beginPath();
+      ctx.ellipse(0, -6 + bob, 7, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#3E2723";
+      ctx.beginPath();
+      ctx.arc(0, -8 + bob, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = "#2D1E18";
+      ctx.beginPath();
+      ctx.arc(-5, -11 + bob, 2, 0, Math.PI * 2);
+      ctx.arc(5, -11 + bob, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Blue Team Bandana
+      ctx.fillStyle = "#2563EB";
+      ctx.beginPath();
+      ctx.roundRect(-12, -20 + bob, 24, 4.5, 2);
+      ctx.fill();
+
+      // Hands on rope
+      ctx.fillStyle = "#8D5B4C";
+      ctx.beginPath();
+      ctx.arc(10, 8 + bob, 4.5, 0, Math.PI * 2);
+      ctx.arc(18, 8 + bob, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawCuteRabbit(ctx, x, y, state) {
+      ctx.save();
+      ctx.translate(x, y);
+      let lean = 0;
+      let bob = Math.sin(gameState.animTime * 6 + 1) * 1.5;
+      if (state === 'pull') lean = 12;
+      if (state === 'sweat') lean = -6;
+      ctx.rotate((lean * Math.PI) / 180);
+
+      // Ears
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.ellipse(-6, -26 + bob, 5, 14, -0.1, 0, Math.PI * 2);
+      ctx.ellipse(6, -26 + bob, 5, 14, 0.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#FDA4AF";
+      ctx.beginPath();
+      ctx.ellipse(-6, -26 + bob, 2.5, 9, -0.1, 0, Math.PI * 2);
+      ctx.ellipse(6, -26 + bob, 2.5, 9, 0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Body
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.ellipse(0, 11 + bob, 15, 17, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Head
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.arc(0, -8 + bob, 14, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cheeks
+      ctx.fillStyle = "rgba(251, 113, 133, 0.4)";
+      ctx.beginPath();
+      ctx.arc(-8, -4 + bob, 3, 0, Math.PI * 2);
+      ctx.arc(8, -4 + bob, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Nose & Eyes
+      ctx.fillStyle = "#E11D48";
+      ctx.beginPath();
+      ctx.arc(0, -6 + bob, 2, 0, Math.PI * 2);
+      ctx.arc(-4, -10 + bob, 2, 0, Math.PI * 2);
+      ctx.arc(4, -10 + bob, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Red Team Bandana
+      ctx.fillStyle = "#E11D48";
+      ctx.beginPath();
+      ctx.roundRect(-11, -17 + bob, 22, 4.5, 2);
+      ctx.fill();
+
+      // Hands on rope
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.arc(-10, 8 + bob, 4.5, 0, Math.PI * 2);
+      ctx.arc(-18, 8 + bob, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function renderTugLoop() {
+      const w = tugCanvas.clientWidth;
+      const h = tugCanvas.clientHeight;
+      tCtx.clearRect(0, 0, w, h);
+
+      gameState.animTime += 0.04;
+      gameState.ropePos += (gameState.targetRope - gameState.ropePos) * 0.1;
+
+      const groundY = h * 0.76;
+      const centerX = w / 2;
+      const currentRopeX = centerX + gameState.ropePos;
+
+      // Draw Center Danger Lines
+      tCtx.strokeStyle = "rgba(245, 158, 11, 0.4)";
+      tCtx.setLineDash([4, 4]);
+      tCtx.lineWidth = 2;
+      tCtx.beginPath();
+      tCtx.moveTo(centerX, 4);
+      tCtx.lineTo(centerX, groundY + 8);
+      tCtx.stroke();
+      tCtx.setLineDash([]);
+
+      // Positions of animals
+      const p1AnchorX = Math.max(35, centerX - 110 + gameState.ropePos * 0.5);
+      const p2AnchorX = Math.min(w - 35, centerX + 110 + gameState.ropePos * 0.5);
+      const ropeY = groundY - 6;
+
+      // Draw Rope
+      tCtx.beginPath();
+      tCtx.moveTo(p1AnchorX - 15, ropeY);
+      tCtx.quadraticCurveTo((p1AnchorX + currentRopeX) / 2, ropeY + 3, currentRopeX, ropeY);
+      tCtx.quadraticCurveTo((currentRopeX + p2AnchorX) / 2, ropeY + 3, p2AnchorX + 15, ropeY);
+      tCtx.strokeStyle = "#92400e";
+      tCtx.lineWidth = 6;
+      tCtx.lineCap = "round";
+      tCtx.stroke();
+
+      // Ribbon Flag in Center of Rope
+      tCtx.fillStyle = "#ef4444";
+      tCtx.beginPath();
+      tCtx.arc(currentRopeX, ropeY, 5.5, 0, Math.PI * 2);
+      tCtx.fill();
+      // Ribbon tails
+      tCtx.beginPath();
+      tCtx.moveTo(currentRopeX - 2, ropeY + 2);
+      tCtx.lineTo(currentRopeX - 5, ropeY + 16);
+      tCtx.lineTo(currentRopeX, ropeY + 11);
+      tCtx.lineTo(currentRopeX + 5, ropeY + 16);
+      tCtx.lineTo(currentRopeX + 2, ropeY + 2);
+      tCtx.fill();
+
+      // Draw Animals
+      drawCuteBear(tCtx, p1AnchorX, groundY - 10, gameState.p1State);
+      drawCuteRabbit(tCtx, p2AnchorX, groundY - 10, gameState.p2State);
+
+      // Render Particles
+      for (let i = gameState.particles.length - 1; i >= 0; i--) {
+        const p = gameState.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.03;
+        p.life--;
+        tCtx.fillStyle = p.color;
+        tCtx.globalAlpha = Math.max(0, p.alpha);
+        tCtx.beginPath();
+        tCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        tCtx.fill();
+        tCtx.globalAlpha = 1;
+        if (p.life <= 0 || p.alpha <= 0) {
+          gameState.particles.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(renderTugLoop);
+    }
+
+    function drawAngleArc(ctx, cx, cy, radius, startAngle, endAngle, color = "#2563eb", fill = "rgba(37, 99, 235, 0.15)") {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, startAngle, endAngle, false);
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function renderVisual(canvasId, visualData) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      resizeCanvas(canvas, ctx);
+
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      if (!visualData) return;
+      const cx = w / 2;
+      const cy = h * 0.65;
+
+      switch (visualData.mode) {
+        case "angle": {
+          const armLen = Math.min(w * 0.35, 65);
+          const deg = visualData.deg;
+          const rad = (deg * Math.PI) / 180;
+
+          // Vertex
+          ctx.beginPath();
+          ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+          ctx.fillStyle = "#1e293b";
+          ctx.fill();
+
+          // Base ray (right)
+          ctx.strokeStyle = "#334155";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + armLen, cy);
+          ctx.stroke();
+
+          // Terminal Ray
+          const endX = cx + Math.cos(-rad) * armLen;
+          const endY = cy + Math.sin(-rad) * armLen;
+          ctx.strokeStyle = "#e11d48";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+
+          // Marker
+          if (deg === 90) {
+            ctx.strokeStyle = "#2563eb";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(cx, cy - 16, 16, 16);
+          } else if (deg === 360) {
+            ctx.strokeStyle = "#8b5cf6";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+            ctx.stroke();
+          } else {
+            drawAngleArc(ctx, cx, cy, 22, -rad, 0, "#0284c7", "rgba(2, 132, 199, 0.2)");
+          }
+
+          ctx.font = "bold 12px Fredoka, Arial";
+          ctx.fillStyle = "#0f172a";
+          ctx.textAlign = "center";
+          ctx.fillText(visualData.label || `${deg}°`, cx + (deg > 100 ? -22 : 30), cy - 18);
+          break;
+        }
+
+        case "protractor": {
+          const pRadius = Math.min(w * 0.4, 75);
+          const baseCY = h * 0.78;
+
+          // Body
+          ctx.beginPath();
+          ctx.arc(cx, baseCY, pRadius, Math.PI, 0, false);
+          ctx.closePath();
+          ctx.fillStyle = "rgba(254, 240, 138, 0.35)";
+          ctx.fill();
+          ctx.strokeStyle = "#ca8a04";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // Center cross
+          ctx.strokeStyle = "#854d0e";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(cx - 6, baseCY);
+          ctx.lineTo(cx + 6, baseCY);
+          ctx.moveTo(cx, baseCY - 6);
+          ctx.lineTo(cx, baseCY + 2);
+          ctx.stroke();
+
+          // Ticks
+          for (let deg = 0; deg <= 180; deg += 10) {
+            const rad = (deg * Math.PI) / 180;
+            const cos = Math.cos(Math.PI - rad);
+            const sin = Math.sin(Math.PI - rad);
+            const len = (deg % 30 === 0) ? 9 : 5;
+
+            ctx.strokeStyle = (deg % 30 === 0) ? "#713f12" : "#a16207";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cx + cos * pRadius, baseCY - sin * pRadius);
+            ctx.lineTo(cx + cos * (pRadius - len), baseCY - sin * (pRadius - len));
+            ctx.stroke();
+
+            if (deg % 30 === 0 && deg > 0 && deg < 180) {
+              ctx.font = "bold 7px Arial";
+              ctx.fillStyle = "#b45309";
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillText(`${deg}`, cx + cos * (pRadius - 15), baseCY - sin * (pRadius - 15));
+            }
+          }
+
+          // Labels for baseline 0
+          ctx.font = "bold 7px Arial";
+          ctx.fillStyle = "#b45309";
+          ctx.fillText("0°(外)", cx - pRadius + 12, baseCY - 8);
+          ctx.fillStyle = "#0369a1";
+          ctx.fillText("0°(內)", cx + pRadius - 12, baseCY - 8);
+
+          // Angle rays
+          const targetRad = (visualData.targetDeg * Math.PI) / 180;
+          ctx.strokeStyle = "#1e293b";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(cx, baseCY);
+          ctx.lineTo(visualData.side === 'right' ? cx + pRadius + 8 : cx - pRadius - 8, baseCY);
+          ctx.stroke();
+
+          const rayAngle = (visualData.side === 'right') ? targetRad : (Math.PI - targetRad);
+          ctx.strokeStyle = "#dc2626";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(cx, baseCY);
+          ctx.lineTo(cx + Math.cos(rayAngle) * (pRadius + 8), baseCY - Math.sin(rayAngle) * (pRadius + 8));
+          ctx.stroke();
+          break;
+        }
+
+        case "clock": {
+          const r = Math.min(w * 0.28, 45);
+          const cCY = h * 0.5;
+
+          ctx.beginPath();
+          ctx.arc(cx, cCY, r, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+          ctx.strokeStyle = "#0284c7";
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          for (let n = 1; n <= 12; n++) {
+            const rad = ((n * 30 - 90) * Math.PI) / 180;
+            ctx.font = "bold 9px Arial";
+            ctx.fillStyle = "#475569";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(n.toString(), cx + Math.cos(rad) * (r - 9), cCY + Math.sin(rad) * (r - 9));
+          }
+
+          const minAngle = ((visualData.minute * 6 - 90) * Math.PI) / 180;
+          const hrAngle = ((((visualData.hour % 12) * 30 + visualData.minute * 0.5) - 90) * Math.PI) / 180;
+
+          // Minute Hand
+          ctx.strokeStyle = "#2563eb";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx, cCY);
+          ctx.lineTo(cx + Math.cos(minAngle) * (r - 12), cCY + Math.sin(minAngle) * (r - 12));
+          ctx.stroke();
+
+          // Hour Hand
+          ctx.strokeStyle = "#e11d48";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(cx, cCY);
+          ctx.lineTo(cx + Math.cos(hrAngle) * (r - 20), cCY + Math.sin(hrAngle) * (r - 20));
+          ctx.stroke();
+          break;
+        }
+
+        case "clockSpan": {
+          const r = Math.min(w * 0.28, 45);
+          const cCY = h * 0.5;
+
+          ctx.beginPath();
+          ctx.arc(cx, cCY, r, 0, Math.PI * 2);
+          ctx.fillStyle = "#f8fafc";
+          ctx.fill();
+          ctx.strokeStyle = "#64748b";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          const sRad = ((visualData.start * 30 - 90) * Math.PI) / 180;
+          const eRad = ((visualData.end * 30 - 90) * Math.PI) / 180;
+
+          ctx.beginPath();
+          ctx.moveTo(cx, cCY);
+          ctx.arc(cx, cCY, r - 2, sRad, eRad, false);
+          ctx.closePath();
+          ctx.fillStyle = "rgba(245, 158, 11, 0.3)";
+          ctx.fill();
+          break;
+        }
+
+        case "combine": {
+          const arm = 60;
+          const aDeg = visualData.a;
+          const totDeg = aDeg + visualData.b;
+
+          ctx.strokeStyle = "#334155";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + arm, cy);
+          ctx.stroke();
+
+          const midRad = -(aDeg * Math.PI) / 180;
+          ctx.strokeStyle = "#0284c7";
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(midRad) * arm, cy + Math.sin(midRad) * arm);
+          ctx.stroke();
+
+          const totRad = -(totDeg * Math.PI) / 180;
+          ctx.strokeStyle = "#e11d48";
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(totRad) * arm, cy + Math.sin(totRad) * arm);
+          ctx.stroke();
+
+          ctx.font = "bold 10px Arial";
+          ctx.fillStyle = "#0284c7";
+          ctx.fillText(`${visualData.a}°`, cx + 32, cy - 8);
+          ctx.fillStyle = "#e11d48";
+          ctx.fillText(`${visualData.b}°`, cx + 18, cy - 28);
+          break;
+        }
+
+        case "straightDiff": {
+          const arm = 60;
+          const cutRad = -(visualData.cut * Math.PI) / 180;
+
+          ctx.strokeStyle = "#334155";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(cx - arm, cy);
+          ctx.lineTo(cx + arm, cy);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#ef4444";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(cutRad) * arm, cy + Math.sin(cutRad) * arm);
+          ctx.stroke();
+
+          ctx.font = "bold 10px Arial";
+          ctx.fillStyle = "#ef4444";
+          ctx.fillText(`${visualData.cut}°`, cx + 28, cy - 10);
+          ctx.fillStyle = "#2563eb";
+          ctx.fillText("?°", cx - 26, cy - 16);
+          break;
+        }
+
+        case "triangles": {
+          const len = 65;
+          const rA = (visualData.a * Math.PI) / 180;
+          const rTot = ((visualData.a + visualData.b) * Math.PI) / 180;
+
+          ctx.strokeStyle = "#475569";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + len, cy);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#2563eb";
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(-rA) * len, cy + Math.sin(-rA) * len);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#f97316";
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(-rTot) * len, cy + Math.sin(-rTot) * len);
+          ctx.stroke();
+
+          ctx.font = "bold 10px Arial";
+          ctx.fillStyle = "#1d4ed8";
+          ctx.fillText(`${visualData.a}°`, cx + 38, cy - 8);
+          ctx.fillStyle = "#c2410c";
+          ctx.fillText(`${visualData.b}°`, cx + 18, cy - 30);
+          break;
+        }
+
+        case "perigonDiff": {
+          const r = 35;
+          const pRad = (visualData.part * Math.PI) / 180;
+
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, r, 0, pRad, false);
+          ctx.closePath();
+          ctx.fillStyle = "rgba(147, 51, 234, 0.25)";
+          ctx.fill();
+          ctx.strokeStyle = "#9333ea";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, r + 6, pRad, Math.PI * 2, false);
+          ctx.closePath();
+          ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
+          ctx.fill();
+          ctx.strokeStyle = "#f59e0b";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          break;
+        }
+      }
+    }
+
+    function renderQuestion(pNum) {
+      const isP1 = pNum === 1;
+      const idx = isP1 ? gameState.p1Index : gameState.p2Index;
+      const qList = isP1 ? PLAYER1_QUESTIONS : PLAYER2_QUESTIONS;
+      const q = qList[idx];
+      const pfx = isP1 ? "p1" : "p2";
+
+      // Update Texts & Tags
+      document.getElementById(`${pfx}LevelTag`).innerText = q.level;
+      document.getElementById(`${pfx}ScoreStatus`).innerText = `得分: ${isP1 ? gameState.p1Score : gameState.p2Score} 分 (第 ${idx + 1}/${qList.length} 題)`;
+      document.getElementById(`${pfx}ProgressBar`).style.width = `${((idx + 1) / qList.length) * 100}%`;
+      document.getElementById(`${pfx}QuestionText`).innerText = q.text;
+
+      // Draw Visual
+      renderVisual(`${pfx}VisCanvas`, q.visual);
+
+      // Hide Feedback
+      document.getElementById(`${pfx}FeedbackBox`).classList.add('hidden');
+
+      // Build Option Buttons
+      const grid = document.getElementById(`${pfx}OptionsGrid`);
+      grid.innerHTML = "";
+
+      const btnBg = isP1
+        ? "bg-blue-50/90 border-blue-200 active:bg-blue-200 text-blue-950"
+        : "bg-rose-50/90 border-rose-200 active:bg-rose-200 text-rose-950";
+
+      q.options.forEach((optText, i) => {
+        const btn = document.createElement('button');
+        btn.className = `w-full py-2 px-2.5 rounded-xl border-2 font-black text-xs sm:text-sm tracking-wide text-center transition-transform active:scale-95 shadow-xs flex items-center justify-center gap-1 ${btnBg}`;
+        btn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-white border border-slate-300 text-[10px] text-slate-700 leading-none pt-0.5">${['A','B','C','D'][i]}</span> ${optText}`;
+
+        btn.onclick = () => handleChoice(pNum, i, btn);
+        grid.appendChild(btn);
+      });
+
+      if (isP1) gameState.p1Locked = false;
+      else gameState.p2Locked = false;
+    }
+
+    function handleChoice(pNum, chosenIdx, btnElem) {
+      const isP1 = pNum === 1;
+      if (isP1 && gameState.p1Locked) return;
+      if (!isP1 && gameState.p2Locked) return;
+
+      if (isP1) gameState.p1Locked = true;
+      else gameState.p2Locked = true;
+
+      const idx = isP1 ? gameState.p1Index : gameState.p2Index;
+      const qList = isP1 ? PLAYER1_QUESTIONS : PLAYER2_QUESTIONS;
+      const q = qList[idx];
+      const isRight = (chosenIdx === q.ans);
+      const pfx = isP1 ? "p1" : "p2";
+
+      const fbBox = document.getElementById(`${pfx}FeedbackBox`);
+      const fbText = document.getElementById(`${pfx}FeedbackText`);
+      const optionsBox = document.getElementById(`${pfx}OptionsGrid`);
+      const buttons = optionsBox.querySelectorAll('button');
+      buttons.forEach(b => b.classList.add('pointer-events-none'));
+
+      // Center Tug Animation and Particles
+      const tugRect = tugCanvas.getBoundingClientRect();
+      const tugCenterCanvasX = tugCanvas.clientWidth / 2;
+
+      if (isRight) {
+        soundRight();
+        soundPull();
+        btnElem.classList.remove('bg-blue-50/90', 'bg-rose-50/90');
+        btnElem.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+
+        if (isP1) {
+          gameState.p1Score += 1;
+          gameState.targetRope -= 24; // Pull to Bear (Left)
+          gameState.p1State = 'pull';
+          gameState.p2State = 'sweat';
+          addParticles(tugCenterCanvasX - 30, 25, '#3b82f6');
+        } else {
+          gameState.p2Score += 1;
+          gameState.targetRope += 24; // Pull to Rabbit (Right)
+          gameState.p2State = 'pull';
+          gameState.p1State = 'sweat';
+          addParticles(tugCenterCanvasX + 30, 25, '#f43f5e');
+        }
+
+        fbBox.className = "mt-1 p-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-[11px] block";
+        fbText.innerHTML = `<span class="font-extrabold text-emerald-800">答對了！</span> ${q.exp}`;
+      } else {
+        soundWrong();
+        btnElem.classList.add('bg-red-500', 'text-white', 'border-red-600');
+        if (buttons[q.ans]) {
+          buttons[q.ans].classList.add('bg-emerald-100', 'border-emerald-400', 'text-emerald-800');
+        }
+
+        if (isP1) gameState.p1State = 'sweat';
+        else gameState.p2State = 'sweat';
+
+        fbBox.className = "mt-1 p-1.5 rounded-xl bg-rose-50 border border-rose-300 text-[11px] block";
+        fbText.innerHTML = `<span class="font-extrabold text-rose-800">答錯了！</span> ${q.exp}`;
+      }
+
+      // Update Top tug prompt
+      const prompt = document.getElementById('tugCenterPrompt');
+      if (gameState.targetRope < -20) {
+        prompt.innerText = "🐻 藍隊小熊發力領先！";
+      } else if (gameState.targetRope > 20) {
+        prompt.innerText = "🐰 紅隊兔子強勢拉回！";
+      }
+
+      // Wait and advance
+      setTimeout(() => {
+        gameState.p1State = 'idle';
+        gameState.p2State = 'idle';
+
+        if (isP1) {
+          gameState.p1Index++;
+          if (gameState.p1Index < qList.length) {
+            renderQuestion(1);
+          } else {
+            checkGameOver();
+          }
+        } else {
+          gameState.p2Index++;
+          if (gameState.p2Index < qList.length) {
+            renderQuestion(2);
+          } else {
+            checkGameOver();
+          }
+        }
+      }, 1800);
+    }
+
+    function checkGameOver() {
+      const bothDone = (gameState.p1Index >= 10 && gameState.p2Index >= 10);
+      const blueLimit = gameState.targetRope <= -85;
+      const redLimit = gameState.targetRope >= 85;
+
+      if (bothDone || blueLimit || redLimit) {
+        if (gameState.isOver) return;
+        gameState.isOver = true;
+        soundWin();
+
+        const modal = document.getElementById('gameOverModal');
+        const winnerTitle = document.getElementById('winnerText');
+        const winnerSub = document.getElementById('winnerSubText');
+        const trophy = document.getElementById('trophyIcon');
+
+        document.getElementById('finalP1Score').innerText = `${gameState.p1Score} / 10 題答對`;
+        document.getElementById('finalP2Score').innerText = `${gameState.p2Score} / 10 題答對`;
+
+        if (gameState.p1Score > gameState.p2Score || blueLimit) {
+          trophy.innerText = "🐻👑";
+          winnerTitle.innerHTML = `<span class="text-blue-600">元氣小熊隊</span> 拔河大勝利！`;
+          winnerSub.innerText = "小熊隊完美掌握量角器與角度，成功將繩子拉過分水嶺！";
+        } else if (gameState.p2Score > gameState.p1Score || redLimit) {
+          trophy.innerText = "🐰👑";
+          winnerTitle.innerHTML = `<span class="text-rose-600">活力兔子隊</span> 拔河大勝利！`;
+          winnerSub.innerText = "兔子隊反應敏捷、算度精準，勇奪拔河冠軍獎盃！";
+        } else {
+          trophy.innerText = "🤝";
+          winnerTitle.innerText = "平分秋色！雙方握手言和！";
+          winnerSub.innerText = "兩位都是四年級幾何角度小高手！";
+        }
+
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function resetGame() {
+      gameState.p1Index = 0;
+      gameState.p2Index = 0;
+      gameState.p1Score = 0;
+      gameState.p2Score = 0;
+      gameState.p1Locked = false;
+      gameState.p2Locked = false;
+      gameState.ropePos = 0;
+      gameState.targetRope = 0;
+      gameState.isOver = false;
+      gameState.p1State = 'idle';
+      gameState.p2State = 'idle';
+
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('tugCenterPrompt').innerText = "拔河對決中！答對拉向自己！";
+
+      renderQuestion(1);
+      renderQuestion(2);
+    }
+
+    const layoutToggleBtn = document.getElementById('layoutToggleBtn');
+    const layoutIcon = document.getElementById('layoutIcon');
+    const layoutLabel = document.getElementById('layoutLabel');
+    const p2Section = document.getElementById('p2Section');
+    const mainContainer = document.getElementById('gameMainContainer');
+
+    layoutToggleBtn.addEventListener('click', () => {
+      isFaceToFace = !isFaceToFace;
+      if (isFaceToFace) {
+        // Face-to-Face Mode (Top player flipped 180 degrees)
+        p2Section.classList.add('face-opposite');
+        mainContainer.classList.remove('sm:flex-row');
+        mainContainer.classList.add('flex-col');
+        layoutIcon.className = "fa-solid fa-arrows-up-down text-indigo-600";
+        layoutLabel.innerText = "面對面(180°)";
+      } else {
+        // Side-by-Side Mode (Both upright)
+        p2Section.classList.remove('face-opposite');
+        layoutIcon.className = "fa-solid fa-table-columns text-indigo-600";
+        layoutLabel.innerText = "並排坐模式";
+      }
+      // Redraw visuals after transition
+      setTimeout(() => {
+        renderVisual('p1VisCanvas', PLAYER1_QUESTIONS[gameState.p1Index].visual);
+        renderVisual('p2VisCanvas', PLAYER2_QUESTIONS[gameState.p2Index].visual);
+      }, 50);
+    });
+
+    // Fullscreen Toggle
+    document.getElementById('fullscreenBtn').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    });
+
+    // Sound Toggle
+    document.getElementById('soundToggleBtn').addEventListener('click', () => {
+      initAudio();
+      isSoundOn = !isSoundOn;
+      const icon = document.getElementById('soundIcon');
+      if (isSoundOn) {
+        icon.className = "fa-solid fa-volume-high text-amber-700";
+      } else {
+        icon.className = "fa-solid fa-volume-xmark text-slate-400";
+      }
+    });
+
+    document.getElementById('resetGameBtn').addEventListener('click', resetGame);
+    document.getElementById('modalRestartBtn').addEventListener('click', resetGame);
+
+    window.addEventListener('resize', () => {
+      resizeCanvas(tugCanvas, tCtx);
+      renderVisual('p1VisCanvas', PLAYER1_QUESTIONS[gameState.p1Index]?.visual);
+      renderVisual('p2VisCanvas', PLAYER2_QUESTIONS[gameState.p2Index]?.visual);
+    });
+
+    // Start application
+    window.onload = function () {
+      resizeCanvas(tugCanvas, tCtx);
+      renderQuestion(1);
+      renderQuestion(2);
+      renderTugLoop();
+    };
+  </script>
+</body>
+</html>
